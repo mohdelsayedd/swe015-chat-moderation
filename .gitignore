@@ -1,0 +1,39 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# --- Virtual environment (never commit it; it is rebuilt from requirements.txt) ---
+.venv/
+venv/
+
+# --- Model weights and trained artifacts (R7: no large weight files in the repo) ---
+# They are uploaded to the Hugging Face Hub instead and downloaded by the app.
+models/
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.onnx
+*.pkl
+*.joblib
+*.model
+*.npy
+
+# --- Caches and local data ---
+data_cache/
+.cache/
+hf_cache/
+.gradio/
+flagged/
+
+# --- Secrets (Hugging Face token etc.) ---
+.env
+
+# --- OS / editor clutter ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# results/ IS committed: results.csv is the source for the slide table.

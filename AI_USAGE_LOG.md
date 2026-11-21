@@ -1,0 +1,9 @@
+# AI Usage Log
+
+**Tool used:** Claude (Anthropic), in the Claude desktop app, as a coding assistant and mentor.
+**Rule I follow:** every number in my slides comes from scripts I ran myself on my own laptop or Colab. Claude never supplied results.
+
+| Stage | What Claude did | What I did / decided / verified myself |
+|---|---|---|
+| 0 | Read the assignment document and drafted REQUIREMENTS.md (checklist of gates, R1–R8, Use Case 4 components, deliverables); pointed out gaps between my plan and the brief. | Chose Use Case 4 and the project plan (4-model ladder, dataset, macro-F1). Decided the open questions: add the edit-distance lexicon matcher, set a 50 ms CPU latency budget, keep the project in English. Checked the checklist against the assignment document. |
+| 1 | Wrote requirements.txt (pinned versions, checked compatibility for Windows + Python 3.11), .gitignore, README draft, src/env_info.py; gave setup instructions; diagnosed the PyTorch DLL error. | Created the GitHub repo, installed Python 3.11, created the virtual environment and installed the packages. Turned off Windows Smart App Control myself after it blocked PyTorch. Ran env_info.py on my laptop (result: ALL OK) and confirmed my hardware details. |
