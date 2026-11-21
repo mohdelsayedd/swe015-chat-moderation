@@ -1,0 +1,6 @@
+model,precision,macro_f1,size_MB,latency_ms,latency_median_ms,latency_p95_ms,latency_runs,meets_50ms_budget,accuracy,offensive_recall,test_fingerprint
+Rule baseline (edit-distance lexicon),rules,0.7363,0.09,0.06,0.05,0.12,200,True,0.7942,0.5833,ac3947edadffd9ab
+tf-idf + logistic regression,FP64,0.7204,0.88,1.21,1.02,2.34,200,True,0.7791,0.575,ac3947edadffd9ab
+word2vec + feedforward net (own),FP32,0.6699,3.54,0.27,0.24,0.51,200,True,0.7209,0.5875,ac3947edadffd9ab
+DistilBERT fine-tuned,FP32,0.7882,256.13,47.59,43.58,76.06,200,True,0.8209,0.7667,ac3947edadffd9ab
+"DistilBERT fine-tuned, quantized",INT8 (dynamic),0.8088,132.97,82.83,81.55,106.12,200,False,0.8547,0.6542,ac3947edadffd9ab

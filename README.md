@@ -2,31 +2,173 @@
 
 **Student:** Mohamed Ahmed ELSAYED · 220911956
 **Course:** SWE015 – Introduction to Large Language Models
+**Models (Hugging Face Hub):** https://huggingface.co/mohdelsayed/swe015-distilbert-offensive
 
-> Work in progress. The full setup steps and the single run command are added in Stage 9
-> and tested in a fresh virtual environment.
+A chat-style app for a gaming platform that labels every message **clean / offensive**
+live on a **CPU**, masks offensive messages, and logs the response time of each message.
+Five models are compared on the same held-out test set; the app runs the
+**quantized (INT8) DistilBERT** by default and lets you switch to any other model.
 
-## What this is
-A chat-style app that labels each message **clean / offensive** live, masks flagged
-messages, and logs response time per message. It compares four models on the same
-held-out test set:
+---
 
-1. Classical baseline: regex normalization + tf-idf + logistic regression
-   (plus an edit-distance lexicon matcher as a rule baseline)
-2. Own neural network: word2vec trained on our training messages + a feedforward network (SGD)
-3. Transformer: fine-tuned `distilbert-base-uncased`
-4. Quantized Transformer: the same DistilBERT with dynamic INT8 quantization (the app's default)
+## Quick start (fresh environment)
 
-Latency budget: **50 ms per message on CPU** for the quantized model.
+Requirements: **Python 3.11** (64-bit; tested. The pinned packages also install on 3.12/3.13), **git**, an internet connection (the first start
+downloads ~270 MB of model weights from the Hugging Face Hub).
 
-## Quick environment check (Stage 1)
+**Windows (PowerShell)**
 ```powershell
+git clone https://github.com/mohdelsayedd/swe015-chat-moderation.git
+cd swe015-chat-moderation
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
 pip install -r requirements.txt
-python -m src.env_info
+python app.py
 ```
 
-## Data
-TweetEval, `offensive` subset (English, from OffensEval 2019 / OLID). Full citations follow in Stage 2.
+**macOS / Linux**
+```bash
+git clone https://github.com/mohdelsayedd/swe015-chat-moderation.git
+cd swe015-chat-moderation
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python app.py
+```
+
+**Single run command:** `python app.py`. It downloads any missing model files, then opens
+the app in your browser (or go to http://127.0.0.1:7860). No training is needed to run it.
+
+### Troubleshooting
+| Problem | Fix |
+|---|---|
+| `Activate.ps1 cannot be loaded … running scripts is disabled` | Run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force` first (this window only) |
+| `OSError: [WinError 4551] An Application Control policy has blocked this file` (torch DLL) | Windows 11 **Smart App Control** blocks PyTorch's unsigned DLLs. Turn it off in Windows Security → App & browser control → Smart App Control, or run on macOS/Linux |
+| Linux: `pip install` downloads several GB | PyPI's Linux torch wheel includes CUDA. Install the CPU build first: `pip install torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu`, then `pip install -r requirements.txt` |
+| Port 7860 already in use | Close the other app, or edit `demo.launch(...)` in `app.py` to add `server_port=7861` |
+| `DeprecationWarning` / `UserWarning` about `torch.ao.quantization` | Expected: the API is deprecated upstream (moving to torchao) but works in the pinned torch 2.15.0 |
+
+---
+
+## What the app does
+
+| Use Case 4 requirement | Where |
+|---|---|
+| Chat-like interface | `app.py`: Gradio chat |
+| Each message labelled live (clean / offensive) with confidence | Bot reply under every message |
+| Flagged messages masked | Offensive messages shown as `y•• i••••` |
+| Side panel logs response time of every message | "Response-time log" table + session mean vs the 50 ms budget |
+| Switch between models | "Model" dropdown (default: DistilBERT INT8) |
+| (encouraged) other models side by side | "All models on the last message" table |
+
+Latency budget: **50 ms per message on CPU** (set before measuring). All models run with
+**1 CPU thread per message** (`CPU_THREADS` in `src/quantize.py`; see Results).
+
+---
+
+## Models (the model ladder)
+
+| # | Model | Technique area | Code |
+|---|---|---|---|
+| 0 | Rule baseline: training-data lexicon + Damerau-Levenshtein edit-distance matcher | B | `src/lexicon.py` |
+| 1 | Classical baseline: regex normalization + tf-idf + logistic regression | B | `src/preprocess.py`, `src/baseline.py` |
+| 2 | Own neural net: word2vec (trained on our training tweets) + feedforward net, SGD + backprop | A, B | `src/w2v_ffn.py` |
+| 3 | Transformer: `distilbert-base-uncased` fine-tuned (FP32) | C | `src/bert_train.py` (run on Colab: `notebooks/train_distilbert_colab.ipynb`) |
+| 4 | Quantized Transformer: same model, dynamic INT8 quantization of all `nn.Linear` layers | D | `src/quantize.py` |
+
+All settings were tuned on the **validation** split only; the **test** split is used once,
+by `src/benchmark.py`, for all models together.
+
+---
+
+## Results
+
+Final run: `results/results.csv` (generated by `python -m src.benchmark`, 2026-11-22 01:28:42). Test set: 860 tweets, fingerprint `ac3947edadffd9ab` (identical for every row).
+
+| Model | Precision | Test macro-F1 | Size (MB) | Latency mean (ms) | Latency p95 (ms) | ≤ 50 ms budget |
+|---|---|---|---|---|---|---|
+| Rule baseline (edit-distance lexicon) | rules | 0.7363 | 0.09 | 0.07 | 0.13 | ✅ |
+| tf-idf + logistic regression | FP64 | 0.7204 | 0.88 | 1.18 | 1.83 | ✅ |
+| word2vec + feedforward net (own) | FP32 | 0.6699 | 3.54 | 0.21 | 0.3 | ✅ |
+| DistilBERT fine-tuned | FP32 | 0.7882 | 256.13 | 59.94 | 101.55 | ❌ |
+| DistilBERT fine-tuned, quantized | INT8 (dynamic) | 0.8088 | 132.97 | 48.8 | 71.39 | ✅ |
+
+**Hardware:** Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz, 8 logical cores, 15.8 GB RAM, Windows 11 (build 10.0.26300), Python 3.11.9, PyTorch 2.15.0 (CPU), quantization engine `onednn`, **1 CPU thread**.
+**Latency:** one message at a time (batch size 1), end to end (preprocessing/tokenization + model), 10 warm-up + 200 timed runs over different test messages. **Size:** disk size of everything the model needs to run, 1 MB = 2^20 bytes.
+
+**Why 1 CPU thread** (`src/thread_sweep.py`, validation messages, mean ms over 100 runs):
+
+| Threads | DistilBERT FP32 | DistilBERT INT8 |
+|---|---|---|
+| 1 | 62.43 | 42.1 |
+| 2 | 38.67 | 45.16 |
+| 4 | 37.27 | 61.0 |
+| 8 | 45.19 | 94.81 |
+
+A CPU chat server handles many messages at once, so each message gets one core. Under that setting dynamic INT8 quantization is what brings DistilBERT within the 50 ms budget. With 4 threads FP32 is faster: on this CPU (oneDNN backend, no VNNI instructions) quantized kernels lose more to thread coordination. The first benchmark run (PyTorch default, 4 threads) is kept in `results/results_run1_4threads.csv`: same macro-F1 and sizes, different latencies.
+
+---
+
+## Reproduce everything (optional; the app does not need this)
+
+```bash
+python -m src.env_info        # environment + hardware check
+python -m src.data            # download TweetEval-offensive, fixed splits, fingerprints
+python -m src.preprocess      # demo of the regex normalizer
+python -m src.lexicon         # rule baseline (tunes K on validation)
+python -m src.baseline        # tf-idf + logistic regression (tunes C on validation)
+python -m src.w2v_ffn         # word2vec + feedforward net (tunes on validation)
+# DistilBERT: open notebooks/train_distilbert_colab.ipynb in Google Colab (T4 GPU)
+#             -> runs src/bert_train.py and uploads the model to the Hugging Face Hub
+python -m src.quantize        # INT8 quantization + validation comparison
+python -m src.thread_sweep    # CPU-thread sweep on validation messages
+python -m src.benchmark       # FINAL: test-set macro-F1, size, latency -> results/results.csv
+python -m src.upload_models   # (needs `hf auth login`) upload the classical models to the Hub
+```
+Random seed 42 everywhere (`src/data.py`).
+
+---
+
+## Repository layout
+```
+app.py                     Gradio chat app (single run command)
+requirements.txt           exact pinned versions
+src/data.py                dataset loading, fixed splits, fingerprints, seed
+src/preprocess.py          regex normalization (leetspeak, repeated letters, Turkish chars)
+src/lexicon.py             rule baseline (edit-distance lexicon matcher)
+src/baseline.py            tf-idf + logistic regression
+src/w2v_ffn.py             word2vec + feedforward network
+src/bert_train.py          DistilBERT fine-tuning (Colab)
+src/quantize.py            dynamic INT8 quantization, DistilBERT loading, CPU_THREADS
+src/thread_sweep.py        latency vs CPU threads (validation messages)
+src/benchmark.py           final test-set evaluation -> results/results.csv
+src/upload_models.py       upload classical models to the Hub
+src/env_info.py            environment + hardware report
+notebooks/                 Colab notebook for Stage 5
+results/                   all measured outputs (CSV / JSON)
+REQUIREMENTS.md            assignment checklist and decisions log
+AI_USAGE_LOG.md            what the AI assistant did vs. what I did
+```
+Model weights are **not** in this repository (R7); they are on the Hugging Face Hub and
+are downloaded automatically.
+
+---
+
+## Data and citations
+
+**TweetEval, `offensive` subset** (`cardiffnlp/tweet_eval`, config `offensive`):
+train 11,916 · validation 1,324 · test 860 tweets; labels 0 = not offensive (clean),
+1 = offensive. Official fixed splits, used unchanged.
+
+- Zampieri, M., Malmasi, S., Nakov, P., Rosenthal, S., Farra, N., & Kumar, R. (2019).
+  *SemEval-2019 Task 6: Identifying and Categorizing Offensive Language in Social Media (OffensEval).*
+  Proceedings of the 13th International Workshop on Semantic Evaluation, 75–86.
+- Barbieri, F., Camacho-Collados, J., Espinosa Anke, L., & Neves, L. (2020).
+  *TweetEval: Unified Benchmark and Comparative Evaluation for Tweet Classification.*
+  Findings of EMNLP 2020.
+- Pretrained model: `distilbert-base-uncased` (Sanh, V., Debut, L., Chaumond, J., & Wolf, T. (2019).
+  *DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter.*)
+
+## AI usage
+An AI assistant (Claude, Anthropic) was used for code drafts, debugging and documentation.
+See `AI_USAGE_LOG.md` for what it did and what I did and verified myself.

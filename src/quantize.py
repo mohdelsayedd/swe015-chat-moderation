@@ -44,8 +44,20 @@ HF_MODEL_REPO = "mohdelsayed/swe015-distilbert-offensive"   # created in Stage 5
 MODEL_DIR = Path("models")
 INT8_STATE_PATH = MODEL_DIR / "distilbert_int8_state.pt"
 MAX_LENGTH = 128                                             # same as in training
+# CPU threads used by the benchmark AND the app (one shared setting, so they match).
+# Chosen with src/thread_sweep.py (Stage 7b, validation messages, speed only):
+# with 1 thread INT8 was fastest (42.1 ms, within the 50 ms budget; FP32 62.4 ms).
+# Deployment reasoning: a CPU chat server handles many messages at once -> one core each.
+CPU_THREADS = 1
 NEEDED_FILES = ["config.json", "model.safetensors", "tokenizer.json",
                 "tokenizer_config.json", "val_distilbert.json"]
+
+
+def apply_cpu_threads() -> int:
+    """Apply CPU_THREADS (if set) and return the thread count actually in use."""
+    if CPU_THREADS:
+        torch.set_num_threads(CPU_THREADS)
+    return torch.get_num_threads()
 
 
 def download_model(repo_id: str = HF_MODEL_REPO) -> Path:

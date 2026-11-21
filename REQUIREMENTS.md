@@ -45,11 +45,11 @@ Due: **Sunday 22 November 2026**. Weight: 15%. Grades: 0 / 50 / 100.
 
 | ID | Exact wording | Gate | Stage | Status |
 |---|---|---|---|---|
-| R1 | "Working application. An interactive interface (Gradio, Streamlit, or a web front end over FastAPI) that accepts new input typed, drawn or uploaded during the demo and returns a result. A notebook that prints outputs is not an application." | 0 (via G1-2) | 8 | ☐ |
+| R1 | "Working application. An interactive interface (Gradio, Streamlit, or a web front end over FastAPI) that accepts new input typed, drawn or uploaded during the demo and returns a result. A notebook that prints outputs is not an application." | 0 (via G1-2) | 8 | ☑ |
 | R2 | "Required techniques. At least one technique from each of the four areas in Section 3, shown on a technique map slide." | 50 | 3–6, 11 | ☐ |
 | R3 | "Model ladder. Four models evaluated on the same held-out test set: classical baseline, a neural network you trained, a Transformer, and the quantized Transformer." | 50 (0 if no Transformer/quantized) | 3–7 | ☐ |
 | R4 | "Results table. One row per model; columns: task metric, model size (MB), latency (ms, averaged over ≥100 runs; state the hardware)." (The CNN before/after rows apply only to Use Cases 1 and 3, so not to us.) | 50 | 7 | ☐ |
-| R5 | "Quantized model in the application. The application runs the quantized Transformer. Showing the other models side by side is encouraged." | 50 | 8 | ☐ |
+| R5 | "Quantized model in the application. The application runs the quantized Transformer. Showing the other models side by side is encouraged." | 50 | 8 | ☑ |
 | R6 | "Architecture diagram. Every component and the data flow from user input to output: preprocessing, each model (name and precision), post-processing, user interface, and where it runs. It must match the code." | 50 | 10 | ☐ |
 | R7 | "Code repository. GitHub or GitLab, public or shared with the instructor. A README with setup steps and a single run command, a requirements.txt, and no large weight files in the repository (link to Hugging Face Hub or Google Drive instead)." | 50 (0 if missing) | 1, 9 | ☐ |
 | R8 | "AI usage statement. One slide, as described in Section 6." | 50 | 11 | ☐ |
@@ -63,11 +63,11 @@ Scenario: "A gaming platform must flag offensive messages in Turkish (or English
 ### 3a. What the application must do
 | ID | Exact wording (split into checkable parts) | Stage | Status |
 |---|---|---|---|
-| UC4-APP-1 | "provide a chat-like interface" | 8 | ☐ |
-| UC4-APP-2 | "where each message is labeled live (clean / offensive) with confidence" | 8 | ☐ |
-| UC4-APP-3 | "flagged messages are masked" | 8 | ☐ |
-| UC4-APP-4 | "a side panel logs the response time of every message" | 8 | ☐ |
-| UC4-APP-5 | "and lets the user switch between models" | 8 | ☐ |
+| UC4-APP-1 | "provide a chat-like interface" | 8 | ☑ |
+| UC4-APP-2 | "where each message is labeled live (clean / offensive) with confidence" | 8 | ☑ |
+| UC4-APP-3 | "flagged messages are masked" | 8 | ☑ |
+| UC4-APP-4 | "a side panel logs the response time of every message" | 8 | ☑ |
+| UC4-APP-5 | "and lets the user switch between models" | 8 | ☑ |
 
 ### 3b. Required components
 | ID | Area | Exact wording | Our component | Stage | Status |
@@ -77,8 +77,8 @@ Scenario: "A gaming platform must flag offensive messages in Turkish (or English
 | UC4-B3 | B | "a tf-idf baseline" | `src/baseline.py`: tf-idf + logistic regression | 3 | ☑ |
 | UC4-A1 | A | "your own word2vec trained on the training messages, feeding a feedforward network or a 1D CNN" | `src/w2v_ffn.py`: gensim word2vec + PyTorch FFN | 4 | ☑ |
 | UC4-C1 | C | "BERTurk or a multilingual BERT fine-tuned for classification" | `distilbert-base-uncased`. This is a substitution, so it needs a justification (see notes) | 5 | ☑ |
-| UC4-D1 | D | "a latency budget you set (e.g., 50 ms per message on CPU), met with quantization (optionally also distillation or pruning)" | **Decided (Q2):** budget = **50 ms per message, CPU, quantized DistilBERT** (fixed before any measurement). Reported honestly whether met or not | 6–7 | ☐ |
-| UC4-M1 | — | "Metrics: macro-F1 (classes are imbalanced), latency per message." | `src/benchmark.py` → `results/results.csv` | 7 | ☐ |
+| UC4-D1 | D | "a latency budget you set (e.g., 50 ms per message on CPU), met with quantization (optionally also distillation or pruning)" | **Decided (Q2):** budget = **50 ms per message, CPU, quantized DistilBERT** (fixed before any measurement). Reported honestly whether met or not | 6–7 | ☑ |
+| UC4-M1 | — | "Metrics: macro-F1 (classes are imbalanced), latency per message." | `src/benchmark.py` → `results/results.csv` | 7 | ☑ |
 | UC4-DATA | — | "Suggested data: OffensEval-TR 2020 (Turkish) or Jigsaw Toxic Comment Classification (English)." | `tweet_eval/offensive` (the English OffensEval 2019 / OLID data). This is allowed: "You may change domain details (language, product category, corpus)" | 2 | ☐ |
 
 Substitution rule (§3): "You may replace a component with another technique from the same area if you explain why."
@@ -193,6 +193,10 @@ Ladder rule (§4): "You may change domain details … but the application requir
 | D13 | DistilBERT (distilbert-base-uncased), raw text input, max_length 128, lr 2e-5, 3 epochs, batch 32, weight decay 0.01, 10% warmup, fp16 on GPU; best epoch by validation macro-F1; trained on Colab T4; weights uploaded to a public HF Hub repo `<hf-user>/swe015-distilbert-offensive`. Written for transformers 5.x (`processing_class=`, float `warmup_steps`; `tokenizer=` and `warmup_ratio` no longer exist) | Standard BERT fine-tuning recipe; raw text because WordPiece was pretrained on raw text; Hub hosting satisfies R7 (no weights in git) |
 | D14 | Quantization: `torch.ao.quantization.quantize_dynamic(model, {nn.Linear}, dtype=torch.qint8)` on CPU; applied at load time from the FP32 Hub model (no extra hosted file); size = bytes of `torch.save(state_dict)` in MB (2^20), same method for FP32 and INT8; accuracy cost checked on validation | Dynamic quantization needs no calibration data or retraining, and Linear layers dominate Transformer CPU time; consistent size method makes FP32 vs INT8 comparable |
 | D15 | Benchmark: test split used ONLY here; fingerprint asserted; 5 rows (rule, tf-idf, w2v+FFN, DistilBERT FP32, DistilBERT INT8); size = disk bytes of everything needed for inference (BERT: torch.save state_dict + config + tokenizer), MB = 2^20; latency = batch size 1, CPU, end-to-end, 10 warm-up + 200 timed runs over different test messages, mean (also median, p95); budget check 50 ms | R3/R4 exactly; per-message latency matches the chat use case; same size method for every model |
+| D16 | All trained models live on the HF Hub repo (DistilBERT at the root, classical models under `classical/`); app.py downloads anything missing from models/ | R7: no weights in git, yet a fresh clone runs with one command |
+| D17 | App: Gradio 6.32 Blocks; default model DistilBERT INT8 (quantized at start-up); dropdown for all 5 models; flagged messages masked as first letter + bullets; per-message latency log + session mean vs 50 ms budget; side-by-side table of all models on the last message; 5 warm-up calls per model at start-up | Meets every UC4 application requirement and R5; warm-up avoids a misleading slow first message |
+| D18 | Benchmark run 1 showed INT8 slower than FP32 (oneDNN is the only quantized backend in this Windows PyTorch build; i7-8550U has no VNNI). Thread count is a deployment setting, so it is swept on VALIDATION messages (speed only, no labels) and one shared `CPU_THREADS` value is used for every model and the app. Run 1 is kept as results/results_run1_4threads.csv | Honest record: the change was prompted by run 1, the test set did not drive it, and both runs are kept |
+| D19 | Thread sweep (validation messages, 100 runs each), mean ms FP32/INT8: 1 thread 62.43/42.10; 2: 38.67/45.16; 4: 37.27/61.00; 8: 45.19/94.81. Chosen CPU_THREADS = 1 for benchmark and app; full table shown on the slides | One-thread-per-message matches a CPU chat server serving many users; under it INT8 meets the 50 ms budget and FP32 does not. Showing the whole table (FP32 at 4 threads is fastest overall) keeps it honest |
 
 ## 9. Stage progress
 | Stage | Description | Status |
@@ -204,9 +208,9 @@ Ladder rule (§4): "You may change domain details … but the application requir
 | 4 | word2vec + FFN | ☑ done: hidden=128, lr=0.05, best epoch 3, val macro-F1 0.6412 (below both baselines: small-corpus word2vec + averaging; reported honestly) |
 | 5 | DistilBERT fine-tuning on Colab | ☑ done: trained on Colab Tesla T4; best epoch 1 (checkpoint-373), val macro-F1 0.7754; model public at https://huggingface.co/mohdelsayed/swe015-distilbert-offensive |
 | 6 | Quantization | ☑ done: 38/38 Linear layers -> dynamic INT8 (engine onednn); weights 255.5 MB -> 132.3 MB (1.93x); val macro-F1 FP32 0.7754 vs INT8 0.7809; same label on 88.9% of validation tweets |
-| 7 | Benchmark + results.csv | ◐ src/benchmark.py written (smoke-tested); run after Stage 6 |
-| 8 | Gradio app | ☐ |
-| 9 | README + fresh-env test | ☐ |
+| 7 | Benchmark + results.csv | ☑ done (final run 22 Nov 01:28, 1 CPU thread): test macro-F1 rule 0.7363 / tf-idf 0.7204 / w2v+FFN 0.6699 / DistilBERT FP32 0.7882 / INT8 0.8088; latency FP32 59.94 ms ❌, INT8 48.80 ms ✅ (p95 71.39); sizes 0.09 / 0.88 / 3.54 / 256.13 / 132.97 MB; run 1 (4 threads) kept |
+| 8 | Gradio app | ☑ done: runs on the laptop with all 5 models, INT8 default, session mean 40.8 ms (within budget); classical models uploaded to the Hub `classical/` |
+| 9 | README + fresh-env test | ◐ README written (results table generated from results.csv); fresh-env test pending |
 | 10 | Architecture diagram | ☐ |
 | 11 | Slide deck (PDF) | ☐ |
 | 12 | Video script + recording | ☐ |

@@ -39,7 +39,7 @@ from src.baseline import MODEL_PATH as TFIDF_PATH, TfidfBaseline
 from src.data import RESULTS_DIR, load_splits, set_seed, split_fingerprint
 from src.env_info import hardware_summary
 from src.lexicon import LEXICON_PATH, LexiconMatcher
-from src.quantize import (BertClassifier, HF_MODEL_REPO, download_model,
+from src.quantize import (BertClassifier, HF_MODEL_REPO, apply_cpu_threads, download_model,
                           load_distilbert, quantize_int8)
 from src.w2v_ffn import FFN_PATH, W2V_PATH, W2VFFNModel
 
@@ -76,6 +76,7 @@ def measure_latency(model, messages) -> dict:
 
 def main() -> None:
     set_seed()
+    apply_cpu_threads()                       # same thread setting as the app
     test = load_splits()["test"]
     texts, y = test["text"].tolist(), test["label"].to_numpy()
 
