@@ -1,0 +1,27 @@
+{
+  "model": "Rule baseline (edit-distance lexicon)",
+  "chosen": {
+    "K": 200,
+    "max_dist": 1
+  },
+  "val_macro_f1": 0.7135,
+  "split_used_for_tuning": "validation",
+  "grid_val_macro_f1": {
+    "50": {
+      "d1": 0.6386,
+      "d0": 0.6368
+    },
+    "100": {
+      "d1": 0.6709,
+      "d0": 0.6694
+    },
+    "200": {
+      "d1": 0.7135,
+      "d0": 0.7162
+    },
+    "400": {
+      "d1": 0.7,
+      "d0": 0.708
+    }
+  }
+}

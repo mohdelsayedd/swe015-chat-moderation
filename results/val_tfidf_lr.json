@@ -1,0 +1,9 @@
+{
+  "model": "tf-idf + logistic regression",
+  "chosen": {
+    "C": 4.0
+  },
+  "val_macro_f1": 0.7007,
+  "split_used_for_tuning": "validation",
+  "vocabulary_size": 29763
+}
