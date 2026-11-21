@@ -1,0 +1,15 @@
+{
+  "model": "word2vec + feedforward net (own)",
+  "chosen": {
+    "hidden": 128,
+    "lr": 0.05,
+    "best_epoch": 3,
+    "optimizer": "SGD (momentum 0.9)",
+    "emb_dim": 100,
+    "dropout": 0.3,
+    "batch_size": 64
+  },
+  "val_macro_f1": 0.6412,
+  "split_used_for_tuning": "validation",
+  "w2v_vocabulary": 8426
+}
