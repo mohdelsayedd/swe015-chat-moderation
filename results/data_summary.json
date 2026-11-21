@@ -1,0 +1,34 @@
+{
+  "label_names": {
+    "0": "clean",
+    "1": "offensive"
+  },
+  "splits": {
+    "train": {
+      "rows": 11916,
+      "clean": 7975,
+      "offensive": 3941,
+      "offensive_pct": 33.1,
+      "mean_words": 22.0,
+      "fingerprint": "d3302b1828f17f97"
+    },
+    "validation": {
+      "rows": 1324,
+      "clean": 865,
+      "offensive": 459,
+      "offensive_pct": 34.7,
+      "mean_words": 23.3,
+      "fingerprint": "0c0c9c1689f48b0d"
+    },
+    "test": {
+      "rows": 860,
+      "clean": 620,
+      "offensive": 240,
+      "offensive_pct": 27.9,
+      "mean_words": 23.8,
+      "fingerprint": "ac3947edadffd9ab"
+    }
+  },
+  "train_test_exact_duplicates": 4,
+  "source": "cardiffnlp/tweet_eval/offensive"
+}

@@ -21,6 +21,8 @@ models/
 *.npy
 
 # --- Caches and local data ---
+# data/ holds local copies of the tweets (re-downloaded by src/data.py; not redistributed)
+data/
 data_cache/
 .cache/
 hf_cache/

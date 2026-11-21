@@ -186,13 +186,14 @@ Ladder rule (§4): "You may change domain details … but the application requir
 | D6 | Benchmark machine: Intel Core i7-8550U @ 1.80 GHz, 8 logical cores (torch uses 4 threads), 15.8 GB RAM, Windows (confirm the edition in Settings → About), Python 3.11.9, torch 2.15.0+cpu. Source: `python -m src.env_info` output, 21 Nov | R4 says "state the hardware"; taken from a script, not from memory |
 | D7 | Quantized engine on this CPU: `onednn` (the only one listed); `quantize_dynamic` test passed | Stage 6 runs on this backend |
 | D8 | Windows Smart App Control blocked torch DLLs (WinError 4551); Mohamed turned it off on his own laptop | Mention in README troubleshooting (Stage 9) |
+| D9 | Test set = official TweetEval test split (860 tweets, 27.9% offensive), fingerprint `ac3947edadffd9ab`; 4 exact train/test duplicate texts (reported, not removed) | All models must report this fingerprint (R3); duplicates are kept so we use the official split unchanged, and we disclose them on the data slide |
 
 ## 9. Stage progress
 | Stage | Description | Status |
 |---|---|---|
 | 0 | Requirements checklist | ☑ done (Q1 lexicon matcher = yes · Q2 budget = 50 ms · Q3 language = English, final) |
-| 1 | Workspace and GitHub | ◐ venv OK (`RESULT: ALL OK`); waiting for first push |
-| 2 | Data and splits | ☐ |
+| 1 | Workspace and GitHub | ☑ done: venv ALL OK; first push = commit 08522dc |
+| 2 | Data and splits | ☑ done: source cardiffnlp/tweet_eval/offensive; train 11,916 / val 1,324 / test 860; **test fingerprint `ac3947edadffd9ab`** |
 | 3 | Regex normalization + (lexicon matcher) + tf-idf baseline | ☐ |
 | 4 | word2vec + FFN | ☐ |
 | 5 | DistilBERT fine-tuning on Colab | ☐ |
