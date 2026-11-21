@@ -91,6 +91,8 @@ def hardware_summary() -> dict:
     """Hardware facts used in the results-table caption (R4)."""
     info = {
         "os": f"{platform.system()} {platform.release()} ({platform.machine()})",
+        # Windows 11 still reports release "10"; build number >= 22000 means Windows 11.
+        "os_build": platform.version(),
         "cpu": _cpu_name(),
         "logical_cores": os.cpu_count(),
         "ram": _ram_gb(),

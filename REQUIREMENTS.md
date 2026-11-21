@@ -76,7 +76,7 @@ Scenario: "A gaming platform must flag offensive messages in Turkish (or English
 | UC4-B2 | B | "an edit-distance lexicon matcher as a rule baseline" | **Decided (Q1 = yes):** lexicon built from the **training split only** (words most associated with the offensive label), with fuzzy matching by Levenshtein distance; reported as an extra row "Rule baseline" | 3 | ☑ |
 | UC4-B3 | B | "a tf-idf baseline" | `src/baseline.py`: tf-idf + logistic regression | 3 | ☑ |
 | UC4-A1 | A | "your own word2vec trained on the training messages, feeding a feedforward network or a 1D CNN" | `src/w2v_ffn.py`: gensim word2vec + PyTorch FFN | 4 | ☑ |
-| UC4-C1 | C | "BERTurk or a multilingual BERT fine-tuned for classification" | `distilbert-base-uncased`. This is a substitution, so it needs a justification (see notes) | 5 | ☐ |
+| UC4-C1 | C | "BERTurk or a multilingual BERT fine-tuned for classification" | `distilbert-base-uncased`. This is a substitution, so it needs a justification (see notes) | 5 | ☑ |
 | UC4-D1 | D | "a latency budget you set (e.g., 50 ms per message on CPU), met with quantization (optionally also distillation or pruning)" | **Decided (Q2):** budget = **50 ms per message, CPU, quantized DistilBERT** (fixed before any measurement). Reported honestly whether met or not | 6–7 | ☐ |
 | UC4-M1 | — | "Metrics: macro-F1 (classes are imbalanced), latency per message." | `src/benchmark.py` → `results/results.csv` | 7 | ☐ |
 | UC4-DATA | — | "Suggested data: OffensEval-TR 2020 (Turkish) or Jigsaw Toxic Comment Classification (English)." | `tweet_eval/offensive` (the English OffensEval 2019 / OLID data). This is allowed: "You may change domain details (language, product category, corpus)" | 2 | ☐ |
@@ -191,6 +191,8 @@ Ladder rule (§4): "You may change domain details … but the application requir
 | D11 | tf-idf: word 1-2 grams, min_df=2, sublinear tf; LogisticRegression class_weight=balanced; C tuned on validation; all models train on TRAIN only, test is used only in Stage 7 | Standard strong text baseline; balanced weights for the ~1/3 offensive imbalance; one final test evaluation for all models (Hard Rule 2) |
 | D12 | word2vec: skip-gram, 100-d, window 5, min_count 2, 20 epochs, trained on TRAIN tweets only, CRC32 hash + 1 worker for reproducibility. FFN: mean of word vectors, standardized with train stats -> Linear(100,h) -> ReLU -> Dropout 0.3 -> Linear(h,1); BCE loss with pos_weight; SGD + momentum 0.9, batch 64; hidden {64,128} x lr {0.05,0.1} and early stopping on validation macro-F1 | UC4-A1 asks for own word2vec feeding an FFN; Area A asks for SGD + backprop; averaging = simplest fixed-size input (loses word order: a known limitation) |
 | D13 | DistilBERT (distilbert-base-uncased), raw text input, max_length 128, lr 2e-5, 3 epochs, batch 32, weight decay 0.01, 10% warmup, fp16 on GPU; best epoch by validation macro-F1; trained on Colab T4; weights uploaded to a public HF Hub repo `<hf-user>/swe015-distilbert-offensive`. Written for transformers 5.x (`processing_class=`, float `warmup_steps`; `tokenizer=` and `warmup_ratio` no longer exist) | Standard BERT fine-tuning recipe; raw text because WordPiece was pretrained on raw text; Hub hosting satisfies R7 (no weights in git) |
+| D14 | Quantization: `torch.ao.quantization.quantize_dynamic(model, {nn.Linear}, dtype=torch.qint8)` on CPU; applied at load time from the FP32 Hub model (no extra hosted file); size = bytes of `torch.save(state_dict)` in MB (2^20), same method for FP32 and INT8; accuracy cost checked on validation | Dynamic quantization needs no calibration data or retraining, and Linear layers dominate Transformer CPU time; consistent size method makes FP32 vs INT8 comparable |
+| D15 | Benchmark: test split used ONLY here; fingerprint asserted; 5 rows (rule, tf-idf, w2v+FFN, DistilBERT FP32, DistilBERT INT8); size = disk bytes of everything needed for inference (BERT: torch.save state_dict + config + tokenizer), MB = 2^20; latency = batch size 1, CPU, end-to-end, 10 warm-up + 200 timed runs over different test messages, mean (also median, p95); budget check 50 ms | R3/R4 exactly; per-message latency matches the chat use case; same size method for every model |
 
 ## 9. Stage progress
 | Stage | Description | Status |
@@ -200,9 +202,9 @@ Ladder rule (§4): "You may change domain details … but the application requir
 | 2 | Data and splits | ☑ done: source cardiffnlp/tweet_eval/offensive; train 11,916 / val 1,324 / test 860; **test fingerprint `ac3947edadffd9ab`** |
 | 3 | Regex normalization + lexicon matcher + tf-idf baseline | ☑ done: rule baseline K=200, val macro-F1 0.7135; tf-idf+LR C=4.0, val macro-F1 0.7007 (validation only; test scores come in Stage 7) |
 | 4 | word2vec + FFN | ☑ done: hidden=128, lr=0.05, best epoch 3, val macro-F1 0.6412 (below both baselines: small-corpus word2vec + averaging; reported honestly) |
-| 5 | DistilBERT fine-tuning on Colab | ◐ src/bert_train.py + notebooks/train_distilbert_colab.ipynb written (smoke-tested with a tiny model); waiting for your Colab run |
-| 6 | Quantization | ☐ |
-| 7 | Benchmark + results.csv | ☐ |
+| 5 | DistilBERT fine-tuning on Colab | ☑ done: trained on Colab Tesla T4; best epoch 1 (checkpoint-373), val macro-F1 0.7754; model public at https://huggingface.co/mohdelsayed/swe015-distilbert-offensive |
+| 6 | Quantization | ☑ done: 38/38 Linear layers -> dynamic INT8 (engine onednn); weights 255.5 MB -> 132.3 MB (1.93x); val macro-F1 FP32 0.7754 vs INT8 0.7809; same label on 88.9% of validation tweets |
+| 7 | Benchmark + results.csv | ◐ src/benchmark.py written (smoke-tested); run after Stage 6 |
 | 8 | Gradio app | ☐ |
 | 9 | README + fresh-env test | ☐ |
 | 10 | Architecture diagram | ☐ |

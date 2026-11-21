@@ -1,0 +1,64 @@
+{
+  "model": "distilbert-base-uncased fine-tuned (FP32)",
+  "chosen": {
+    "learning_rate": 2e-05,
+    "epochs_max": 3,
+    "best_checkpoint": "checkpoints/checkpoint-373",
+    "batch_size": 32,
+    "max_length": 128
+  },
+  "val_macro_f1": 0.7754,
+  "split_used_for_tuning": "validation",
+  "trained_on": "GPU Tesla T4",
+  "train_rows": 11916,
+  "log_history": [
+    {
+      "loss": 0.493,
+      "grad_norm": 6.1709,
+      "learning_rate": 0.0,
+      "epoch": 1.0,
+      "step": 373
+    },
+    {
+      "eval_loss": 0.4479,
+      "eval_macro_f1": 0.7754,
+      "eval_runtime": 0.9197,
+      "eval_samples_per_second": 1439.575,
+      "eval_steps_per_second": 22.833,
+      "epoch": 1.0,
+      "step": 373
+    },
+    {
+      "loss": 0.3755,
+      "grad_norm": 7.9095,
+      "learning_rate": 0.0,
+      "epoch": 2.0,
+      "step": 746
+    },
+    {
+      "eval_loss": 0.4411,
+      "eval_macro_f1": 0.7722,
+      "eval_runtime": 0.9336,
+      "eval_samples_per_second": 1418.096,
+      "eval_steps_per_second": 22.492,
+      "epoch": 2.0,
+      "step": 746
+    },
+    {
+      "loss": 0.307,
+      "grad_norm": 5.3656,
+      "learning_rate": 0.0,
+      "epoch": 3.0,
+      "step": 1119
+    },
+    {
+      "eval_loss": 0.4569,
+      "eval_macro_f1": 0.7742,
+      "eval_runtime": 1.0619,
+      "eval_samples_per_second": 1246.852,
+      "eval_steps_per_second": 19.776,
+      "epoch": 3.0,
+      "step": 1119
+    }
+  ]
+}
