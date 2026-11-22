@@ -2,7 +2,8 @@
 
 **Student:** Mohamed Ahmed ELSAYED · 220911956
 **Course:** SWE015 – Introduction to Large Language Models
-**Models (Hugging Face Hub):** https://huggingface.co/mohdelsayed/swe015-distilbert-offensive
+**Models (Hugging Face Hub):** https://huggingface.co/mohdelsayed/swe015-distilbert-offensive  
+**Demo video (2 min):** https://youtu.be/NUB3k0UknZ8
 
 A chat-style app for a gaming platform that labels every message **clean / offensive**
 live on a **CPU**, masks offensive messages, and logs the response time of each message.

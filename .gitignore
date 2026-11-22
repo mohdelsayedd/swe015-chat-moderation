@@ -29,6 +29,9 @@ hf_cache/
 .gradio/
 flagged/
 
+# --- Videos (the demo video goes on YouTube, not in git) ---
+*.mp4
+
 # --- Secrets (Hugging Face token etc.) ---
 .env
 

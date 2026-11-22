@@ -46,12 +46,12 @@ Due: **Sunday 22 November 2026**. Weight: 15%. Grades: 0 / 50 / 100.
 | ID | Exact wording | Gate | Stage | Status |
 |---|---|---|---|---|
 | R1 | "Working application. An interactive interface (Gradio, Streamlit, or a web front end over FastAPI) that accepts new input typed, drawn or uploaded during the demo and returns a result. A notebook that prints outputs is not an application." | 0 (via G1-2) | 8 | ☑ |
-| R2 | "Required techniques. At least one technique from each of the four areas in Section 3, shown on a technique map slide." | 50 | 3–6, 11 | ☐ |
-| R3 | "Model ladder. Four models evaluated on the same held-out test set: classical baseline, a neural network you trained, a Transformer, and the quantized Transformer." | 50 (0 if no Transformer/quantized) | 3–7 | ☐ |
-| R4 | "Results table. One row per model; columns: task metric, model size (MB), latency (ms, averaged over ≥100 runs; state the hardware)." (The CNN before/after rows apply only to Use Cases 1 and 3, so not to us.) | 50 | 7 | ☐ |
+| R2 | "Required techniques. At least one technique from each of the four areas in Section 3, shown on a technique map slide." | 50 | 3–6, 11 | ☑ |
+| R3 | "Model ladder. Four models evaluated on the same held-out test set: classical baseline, a neural network you trained, a Transformer, and the quantized Transformer." | 50 (0 if no Transformer/quantized) | 3–7 | ☑ |
+| R4 | "Results table. One row per model; columns: task metric, model size (MB), latency (ms, averaged over ≥100 runs; state the hardware)." (The CNN before/after rows apply only to Use Cases 1 and 3, so not to us.) | 50 | 7 | ☑ |
 | R5 | "Quantized model in the application. The application runs the quantized Transformer. Showing the other models side by side is encouraged." | 50 | 8 | ☑ |
-| R6 | "Architecture diagram. Every component and the data flow from user input to output: preprocessing, each model (name and precision), post-processing, user interface, and where it runs. It must match the code." | 50 | 10 | ☐ |
-| R7 | "Code repository. GitHub or GitLab, public or shared with the instructor. A README with setup steps and a single run command, a requirements.txt, and no large weight files in the repository (link to Hugging Face Hub or Google Drive instead)." | 50 (0 if missing) | 1, 9 | ☐ |
+| R6 | "Architecture diagram. Every component and the data flow from user input to output: preprocessing, each model (name and precision), post-processing, user interface, and where it runs. It must match the code." | 50 | 10 | ☑ |
+| R7 | "Code repository. GitHub or GitLab, public or shared with the instructor. A README with setup steps and a single run command, a requirements.txt, and no large weight files in the repository (link to Hugging Face Hub or Google Drive instead)." | 50 (0 if missing) | 1, 9 | ☑ |
 | R8 | "AI usage statement. One slide, as described in Section 6." | 50 | 11 | ☐ |
 
 ---
@@ -87,11 +87,11 @@ Ladder rule (§4): "You may change domain details … but the application requir
 ### 3c. Technique areas (§3), with at least one per area
 | ID | Area | Our technique(s) | Status |
 |---|---|---|---|
-| T-A | A · Neural networks & deep learning | "feedforward network trained with SGD and backpropagation" → word2vec + FFN | ☐ |
-| T-B | B · Classical NLP | regex normalization; tf-idf; word2vec embeddings; (edit distance, if Q1 = yes) | ☐ |
-| T-C | C · Transformers | "fine-tuning BERT … with a task head"; WordPiece subword tokenizer | ☐ |
-| T-D | D · Efficient models | "quantization (mandatory)"; "benchmarking size, latency and accuracy" | ☐ |
-| T-MAP | — | "Your presentation must include a technique map slide that shows which component of your application uses which technique." | ☐ |
+| T-A | A · Neural networks & deep learning | "feedforward network trained with SGD and backpropagation" → word2vec + FFN | ☑ |
+| T-B | B · Classical NLP | regex normalization; tf-idf; word2vec embeddings; (edit distance, if Q1 = yes) | ☑ |
+| T-C | C · Transformers | "fine-tuning BERT … with a task head"; WordPiece subword tokenizer | ☑ |
+| T-D | D · Efficient models | "quantization (mandatory)"; "benchmarking size, latency and accuracy" | ☑ |
+| T-MAP | — | "Your presentation must include a technique map slide that shows which component of your application uses which technique." | ☑ |
 
 ---
 
@@ -210,8 +210,8 @@ Ladder rule (§4): "You may change domain details … but the application requir
 | 6 | Quantization | ☑ done: 38/38 Linear layers -> dynamic INT8 (engine onednn); weights 255.5 MB -> 132.3 MB (1.93x); val macro-F1 FP32 0.7754 vs INT8 0.7809; same label on 88.9% of validation tweets |
 | 7 | Benchmark + results.csv | ☑ done (final run 22 Nov 01:28, 1 CPU thread): test macro-F1 rule 0.7363 / tf-idf 0.7204 / w2v+FFN 0.6699 / DistilBERT FP32 0.7882 / INT8 0.8088; latency FP32 59.94 ms ❌, INT8 48.80 ms ✅ (p95 71.39); sizes 0.09 / 0.88 / 3.54 / 256.13 / 132.97 MB; run 1 (4 threads) kept |
 | 8 | Gradio app | ☑ done: runs on the laptop with all 5 models, INT8 default, session mean 40.8 ms (within budget); classical models uploaded to the Hub `classical/` |
-| 9 | README + fresh-env test | ◐ README written (results table generated from results.csv); fresh-env test pending |
-| 10 | Architecture diagram | ☐ |
-| 11 | Slide deck (PDF) | ☐ |
-| 12 | Video script + recording | ☐ |
-| 13 | Final submission audit | ☐ |
+| 9 | README + fresh-env test | ☑ done: fresh clone + new venv + empty HF cache (HF_HOME) → `python app.py` downloaded all models and ran (22 Nov 16:33) |
+| 10 | Architecture diagram | ☑ docs/architecture.png/.svg (drawn by docs/make_diagram.py), checked box by box against the code |
+| 11 | Slide deck (PDF) | ◐ 12 slides (https://claude.ai/artifact/GdMbfnkboF56hx6jZLUKR1), video link on slide 1; PDF export pending |
+| 12 | Video script + recording | ☑ recorded and narrated by Mohamed (2:31), sped up 1.27× to 1:59; YouTube unlisted: https://youtu.be/NUB3k0UknZ8 |
+| 13 | Final submission audit | ◐ audit done in chat; PDF export + final push pending |
