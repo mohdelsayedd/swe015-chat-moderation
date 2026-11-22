@@ -20,6 +20,7 @@ downloads ~270 MB of model weights from the Hugging Face Hub).
 ```powershell
 git clone https://github.com/mohdelsayedd/swe015-chat-moderation.git
 cd swe015-chat-moderation
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force   # lets this window run the venv script
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
